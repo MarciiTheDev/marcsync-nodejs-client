@@ -1,0 +1,31 @@
+{
+  "name": "marcsync",
+  "version": "0.0.0",
+  "description": "A NodeJS MarcSync Client to communicate with MarcSync's API",
+  "main": "dist/cjs/index.js",
+  "module": "dist/esm/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "rmdir /s /q dist && npm run build:esm && npm run build:cjs",
+    "build:esm": "tsc",
+    "build:cjs": "tsc --module commonjs --outDir dist/cjs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MarciiTheDev/marcsync-nodejs-client.git"
+  },
+  "keywords": [
+    "marcsync",
+    "api",
+    "client"
+  ],
+  "author": "MarcTheDev",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/MarciiTheDev/marcsync-nodejs-client/issues"
+  },
+  "homepage": "https://github.com/MarciiTheDev/marcsync-nodejs-client#readme",
+  "devDependencies": {
+    "typescript": "^5.1.6"
+  }
+}

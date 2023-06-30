@@ -1,14 +1,11 @@
 {
   "name": "marcsync",
-  "version": "0.0.0",
+  "version": "1.0.2-dev",
   "description": "A NodeJS MarcSync Client to communicate with MarcSync's API",
-  "main": "dist/cjs/index.js",
-  "module": "dist/esm/index.js",
+  "main": "dist/marcsync.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "rmdir /s /q dist && npm run build:esm && npm run build:cjs",
-    "build:esm": "tsc",
-    "build:cjs": "tsc --module commonjs --outDir dist/cjs"
+    "build": "rmdir /s /q dist && tsc && node generate-indexdts.js"
   },
   "repository": {
     "type": "git",

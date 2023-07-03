@@ -1,6 +1,6 @@
 {
   "name": "marcsync",
-  "version": "1.0.2-dev",
+  "version": "1.1.0-dev",
   "description": "A NodeJS MarcSync Client to communicate with MarcSync's API",
   "main": "dist/marcsync.js",
   "types": "dist/index.d.ts",
@@ -23,6 +23,11 @@
   },
   "homepage": "https://github.com/MarciiTheDev/marcsync-nodejs-client#readme",
   "devDependencies": {
+    "@types/node": "^20.3.3",
+    "dotenv": "^16.3.1",
     "typescript": "^5.1.6"
+  },
+  "dependencies": {
+    "@microsoft/signalr": "^7.0.7"
   }
 }

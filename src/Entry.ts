@@ -1,15 +1,11 @@
-export class Entry {
+export class BaseEntry {
 
-    private _accessToken: string;
-    private _collectionName: string;
-    private _entryId: string;
     private _data: EntryData;
+    private _collectionName: string;
 
-    constructor(accessToken: string, collectionName: string, data: EntryData) {
-        this._accessToken = accessToken;
-        this._collectionName = collectionName;
-        this._entryId = data._id;
+    constructor(private data: EntryData, private collectionName: string) {
         this._data = data;
+        this._collectionName = collectionName;
     }
 
     /**
@@ -38,7 +34,7 @@ export class Entry {
     getValues(): EntryData {
         return this._data;
     }
-
+    
     /**
      * 
      * @param key - The key of the value to get
@@ -66,7 +62,7 @@ export class Entry {
     getValueAs<T>(key: string): T {
         return this._data[key];
     }
-
+    
     /**
      * 
      * @param key - The key of the value to get
@@ -97,6 +93,31 @@ export class Entry {
 
     /**
      * 
+     * @returns The name of the collection of the entry
+     * 
+    */
+    getCollectionName(): string {
+        return this._collectionName;
+    }
+
+    protected _setData(data: EntryData) {
+        this._data = data;
+    }
+}
+
+export class Entry extends BaseEntry {
+
+    private _accessToken: string;
+    private _entryId: string;
+
+    constructor(accessToken: string, collectionName: string, data: EntryData) {
+        super(data, collectionName);
+        this._accessToken = accessToken;
+        this._entryId = data._id;
+    }
+
+    /**
+     * 
      * @param key - The key of the value to update
      * @param value - The value to update
      * @returns The values of the entry after update
@@ -120,7 +141,7 @@ export class Entry {
     */
     async updateValue(key: string, value: any): Promise<EntryData> {
         try {
-            const result = await fetch(`https://api.marcsync.dev/v1/entries/${this._collectionName}`, {
+            const result = await fetch(`https://api.marcsync.dev/v1/entries/${this.getCollectionName()}`, {
                 method: "PUT",
                 headers: {
                     authorization: this._accessToken,
@@ -140,8 +161,10 @@ export class Entry {
         } catch (err) {
             throw new EntryUpdateFailed(err);
         }
-        this._data[key] = value;
-        return this._data;
+        const data = this.getValues();
+        data[key] = value;
+        this._setData(data);
+        return data;
     }
 
     /**
@@ -172,7 +195,7 @@ export class Entry {
      */
     async updateValues(values: EntryData): Promise<EntryData> {
         try {
-            const result = await fetch(`https://api.marcsync.dev/v1/entries/${this._collectionName}`, {
+            const result = await fetch(`https://api.marcsync.dev/v1/entries/${this.getCollectionName()}`, {
                 method: "PUT",
                 headers: {
                     authorization: this._accessToken,
@@ -190,10 +213,12 @@ export class Entry {
         } catch (err) {
             throw new EntryUpdateFailed(err);
         }
+        const data = this.getValues();
         for (const key in values) {
-            this._data[key] = values[key];
+            data[key] = values[key];
         }
-        return this._data;
+        this._setData(data);
+        return data;
     }
 
     /**
@@ -203,7 +228,7 @@ export class Entry {
     */
     async delete(): Promise<void> {
         try {
-            const result = await fetch(`https://api.marcsync.dev/v1/entries/${this._collectionName}`, {
+            const result = await fetch(`https://api.marcsync.dev/v1/entries/${this.getCollectionName()}`, {
                 method: "DELETE",
                 headers: {
                     authorization: this._accessToken,

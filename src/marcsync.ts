@@ -1,9 +1,11 @@
 import { Collection, CollectionAlreadyExists, CollectionNotFound } from "./Collection";
-import { Entry, EntryData } from "./Entry";
+import { BaseEntry, Entry } from "./Entry";
+import { SubscriptionManager } from "./SubscriptionManager";
 
 export class Client {
 
     private _accessToken: string;
+    private _subscriptions: SubscriptionManager;
 
     /**
      * 
@@ -12,6 +14,7 @@ export class Client {
      * 
      */
     constructor(accessToken: string) {
+        this._subscriptions = new SubscriptionManager(accessToken);
         this._accessToken = accessToken;
     }
 
@@ -97,10 +100,21 @@ export class Client {
         }
         return new Collection(this._accessToken, collectionName);
     }
+
+    public on<K extends keyof ClientEvents>(event: K, listener: (...args: ClientEvents[K]) => void): this {
+        this._subscriptions.subscribe(event, listener);
+        return this;
+    };
 }
 
 export class Unauthorized extends Error {
     constructor(message: string = "Invalid access token") {
         super(message);
     }
+}
+
+export interface ClientEvents {
+    entryCreated: [entry: Entry, databaseId: string, timestamp: number];
+    entryUpdated: [oldEntry: BaseEntry, newEntry: Entry, databaseId: string, timestamp: number];
+    entryDeleted: [entry: BaseEntry, databaseId: string, timestamp: number];
 }

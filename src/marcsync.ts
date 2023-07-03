@@ -101,6 +101,13 @@ export class Client {
         return new Collection(this._accessToken, collectionName);
     }
 
+    /**
+     * 
+     * @param event - The event to listen to
+     * @param listener - The listener to call when the event is emitted
+     * @returns The client instance
+     * 
+    */
     public on<K extends keyof ClientEvents>(event: K, listener: (...args: ClientEvents[K]) => void): this {
         this._subscriptions.subscribe(event, listener);
         return this;

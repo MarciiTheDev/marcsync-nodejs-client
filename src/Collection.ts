@@ -236,7 +236,7 @@ export class Collection {
      * @see {@link EntryData} for more information about entry data.
      * 
      */
-    async getEntries(filter: EntryData): Promise<Entry[]> {
+    async getEntries(filter: EntryData={}): Promise<Entry[]> {
         try {
             const result = await fetch(`https://api.marcsync.dev/v1/entries/${this._collectionName}?methodOverwrite=GET`, {
                 method: "PATCH",

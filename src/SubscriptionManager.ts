@@ -1,9 +1,6 @@
 import { BaseEntry, Entry, EntryData } from "./Entry";
 import { ClientEvents } from "./marcsync";
 import * as signalR from "@microsoft/signalr";
-import * as dotenv from 'dotenv';
-
-dotenv.config();
 
 export class SubscriptionManager {
 

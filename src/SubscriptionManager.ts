@@ -11,7 +11,11 @@ export class SubscriptionManager {
     
     constructor(accessToken: string) {
         this._accessToken = accessToken;
-        this._subscriptions = {} as Record<keyof ClientEvents, ((...args: any) => void)[]>;
+        this._subscriptions = {
+            entryCreated: [],
+            entryDeleted: [],
+            entryUpdated: []
+        } as Record<keyof ClientEvents, ((...args: any) => void)[]>;
         this._hubConnection = new signalR.HubConnectionBuilder()
             .withUrl("https://ws.marcsync.dev/websocket?access_token=Bearer " + accessToken, {
                 skipNegotiation: true,

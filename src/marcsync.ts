@@ -1,5 +1,5 @@
 import { Collection, CollectionAlreadyExists, CollectionNotFound } from "./Collection";
-import { BaseEntry, Entry } from "./Entry";
+import { BaseEntry, Entry, EntryData } from "./Entry";
 import { SubscriptionManager } from "./SubscriptionManager";
 
 export class Client {
@@ -31,8 +31,8 @@ export class Client {
      * const collection = client.getCollection("my-collection");
      * 
     */
-    getCollection(collectionName: string) {
-        return new Collection(this._accessToken, collectionName);
+    getCollection<T extends EntryData = EntryData>(collectionName: string): Collection<T> {
+        return new Collection<T>(this._accessToken, collectionName);
     }
 
     /**
@@ -51,7 +51,7 @@ export class Client {
      * This method is useful if you want to fetch the collection from the server to check if it exists before using it.
      * 
     */
-    async fetchCollection(collectionName: string): Promise<Collection> {
+    async fetchCollection<T extends EntryData = EntryData>(collectionName: string): Promise<Collection<T>> {
         try {
             const result = await fetch(`https://api.marcsync.dev/v0/collection/${collectionName}`, {
                 method: "GET",
@@ -66,7 +66,7 @@ export class Client {
             if (e instanceof Unauthorized) throw new Unauthorized();
             throw new CollectionNotFound();
         }
-        return new Collection(this._accessToken, collectionName);
+        return new Collection<T>(this._accessToken, collectionName);
     }
 
     /**
@@ -83,7 +83,7 @@ export class Client {
      * 
      * @remarks
     */
-    async createCollection(collectionName: string): Promise<Collection> {
+    async createCollection<T extends EntryData = EntryData>(collectionName: string): Promise<Collection<T>> {
         try {
             const result = await fetch(`https://api.marcsync.dev/v0/collection/${collectionName}`, {
                 method: "POST",
@@ -121,7 +121,7 @@ export class Unauthorized extends Error {
 }
 
 export interface ClientEvents {
-    entryCreated: [entry: Entry, databaseId: string, timestamp: number];
-    entryUpdated: [oldEntry: BaseEntry, newEntry: Entry, databaseId: string, timestamp: number];
-    entryDeleted: [entry: BaseEntry, databaseId: string, timestamp: number];
+    entryCreated: [entry: Entry<EntryData>, databaseId: string, timestamp: number];
+    entryUpdated: [oldEntry: BaseEntry<EntryData>, newEntry: Entry<EntryData>, databaseId: string, timestamp: number];
+    entryDeleted: [entry: BaseEntry<EntryData>, databaseId: string, timestamp: number];
 }

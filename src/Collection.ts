@@ -1,7 +1,7 @@
 import { Entry, EntryData, EntryNotFound } from "./Entry";
 import { Unauthorized } from "./marcsync";
 
-export class Collection {
+export class Collection<T extends EntryData> {
 
     private _accessToken: string;
     private _collectionName: string;
@@ -149,7 +149,7 @@ export class Collection {
      * });
      * 
     */
-    async createEntry(data: EntryData): Promise<Entry> {
+    async createEntry(data: T): Promise<Entry<T>> {
         try {
             const result = await fetch(`https://api.marcsync.dev/v0/entries/${this._collectionName}`, {
                 method: "POST",
@@ -185,7 +185,7 @@ export class Collection {
      * 
      * const entry = await collection.getEntryById("my-entry-id");
     */
-    async getEntryById(id: string): Promise<Entry> {
+    async getEntryById(id: string): Promise<Entry<T>> {
         try {
             const result = await fetch(`https://api.marcsync.dev/v1/entries/${this._collectionName}?methodOverwrite=GET`, {
                 method: "PATCH",
@@ -203,7 +203,7 @@ export class Collection {
             const json = await result.json();
             if (!json.success) throw new Error();
             if(json.entries.length === 0) throw new EntryNotFound();
-            return new Entry(this._accessToken, this._collectionName, json.entries[0]);
+            return new Entry<T>(this._accessToken, this._collectionName, json.entries[0]);
         } catch (e) {
             if(e instanceof Unauthorized) throw new Unauthorized();
             if(e instanceof EntryNotFound) throw new EntryNotFound();
@@ -236,7 +236,7 @@ export class Collection {
      * @see {@link EntryData} for more information about entry data.
      * 
      */
-    async getEntries(filter: EntryData={}): Promise<Entry[]> {
+    async getEntries(filter?: Partial<{ [K in keyof T]: T[K] }>): Promise<Entry<T>[]> {
         try {
             const result = await fetch(`https://api.marcsync.dev/v1/entries/${this._collectionName}?methodOverwrite=GET`, {
                 method: "PATCH",
@@ -245,7 +245,7 @@ export class Collection {
                     "content-type": "application/json"
                 },
                 body: JSON.stringify({
-                    filters: filter
+                    filters: filter || {}
                 })
             })
             if (result.status === 401) throw new Unauthorized();
@@ -297,7 +297,7 @@ export class Collection {
      * **__warning: Will delete the entries from the collection. This action cannot be undone.__**
      * 
     */
-    async deleteEntries(filter: EntryData): Promise<number> {
+    async deleteEntries(filter?: Partial<{ [K in keyof T]: T[K] }>): Promise<number> {
         try {
             const result = await fetch(`https://api.marcsync.dev/v1/entries/${this._collectionName}`, {
                 method: "DELETE",
@@ -324,7 +324,7 @@ export class Collection {
      * @returns The Id of the updated entry
      * 
     */
-    async updateEntryById(id: string, data: EntryData): Promise<string> {
+    async updateEntryById(id: string, data: Partial<{ [K in keyof T]: T[K] }>): Promise<string> {
         try {
             const result = await fetch(`https://api.marcsync.dev/v1/entries/${this._collectionName}`, {
                 method: "PUT",
@@ -355,7 +355,7 @@ export class Collection {
      * @returns The amount of updated entries
      * 
     */
-    async updateEntries(filter: EntryData, data: EntryData): Promise<number> {
+    async updateEntries(filter: Partial<{ [K in keyof T]: T[K] }>, data: Partial<{ [K in keyof T]: T[K] }>): Promise<number> {
         try {
             const result = await fetch(`https://api.marcsync.dev/v1/entries/${this._collectionName}`, {
                 method: "PUT",

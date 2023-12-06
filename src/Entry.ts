@@ -1,9 +1,13 @@
-export class BaseEntry {
+type WithDefaultId<T extends EntryData> = T['_id'] extends string
+  ? T
+  : T & { _id: string };
 
-    private _data: EntryData;
+export class BaseEntry<T extends EntryData> {
+
+    private _data: T;
     private _collectionName: string;
 
-    constructor(private data: EntryData, private collectionName: string) {
+    constructor(private data: T, private collectionName: string) {
         this._data = data;
         this._collectionName = collectionName;
     }
@@ -31,36 +35,8 @@ export class BaseEntry {
      * @see {@link EntryData} for more information about entry data.
      * 
     */
-    getValues(): EntryData {
-        return this._data;
-    }
-    
-    /**
-     * 
-     * @param key - The key of the value to get
-     * @returns The value of the specified key
-     * 
-     * @example
-     * 
-     * import { Client } from "marcsync";
-     * 
-     * const client = new Client("<my access token>");
-     * const collection = client.getCollection("my-collection");
-     * 
-     * const entry = await collection.getEntryById("my-entry-id");
-     * 
-     * const name = entry.getValueAs<string>("name");
-     * 
-     * console.log(name);
-     * 
-     * @remarks
-     * This method is useful if you want to get the value of a specific key as a specific type.
-     * 
-     * @see {@link EntryData} for more information about entry data.
-     * 
-    */
-    getValueAs<T>(key: string): T {
-        return this._data[key];
+    getValues(): WithDefaultId<T> {
+        return this._data as WithDefaultId<T>;
     }
     
     /**
@@ -87,8 +63,8 @@ export class BaseEntry {
      * @see {@link EntryData} for more information about entry data. 
      * 
     */
-    getValue(key: string): any {
-        return this._data[key];
+    getValue<K extends keyof WithDefaultId<T>>(key: K): WithDefaultId<T>[K] {
+        return (this._data as WithDefaultId<T>)[key];
     }
 
     /**
@@ -100,20 +76,20 @@ export class BaseEntry {
         return this._collectionName;
     }
 
-    protected _setData(data: EntryData) {
+    protected _setData(data: T) {
         this._data = data;
     }
 }
 
-export class Entry extends BaseEntry {
+export class Entry<T extends EntryData> extends BaseEntry<T> {
 
     private _accessToken: string;
     private _entryId: string;
 
-    constructor(accessToken: string, collectionName: string, data: EntryData) {
+    constructor(accessToken: string, collectionName: string, data: T) {
         super(data, collectionName);
         this._accessToken = accessToken;
-        this._entryId = data._id;
+        this._entryId = data._id!;
     }
 
     /**
@@ -139,7 +115,7 @@ export class Entry extends BaseEntry {
      * This method is useful if you want to update the value of a specific key.
      * 
     */
-    async updateValue(key: string, value: any): Promise<EntryData> {
+    async updateValue<K extends keyof WithDefaultId<T>>(key: K, value: WithDefaultId<T>[K]): Promise<WithDefaultId<T>> {
         try {
             const result = await fetch(`https://api.marcsync.dev/v1/entries/${this.getCollectionName()}`, {
                 method: "PUT",
@@ -193,7 +169,7 @@ export class Entry extends BaseEntry {
      * @see {@link updateValue} for more information about updating a single value.
      * 
      */
-    async updateValues(values: EntryData): Promise<EntryData> {
+    async updateValues(values: Partial<{ [K in keyof WithDefaultId<T>]: WithDefaultId<T>[K] }>): Promise<WithDefaultId<T>> {
         try {
             const result = await fetch(`https://api.marcsync.dev/v1/entries/${this.getCollectionName()}`, {
                 method: "PUT",
@@ -215,7 +191,7 @@ export class Entry extends BaseEntry {
         }
         const data = this.getValues();
         for (const key in values) {
-            data[key] = values[key];
+            data[key] = values[key]!;
         }
         this._setData(data);
         return data;
@@ -249,6 +225,7 @@ export class Entry extends BaseEntry {
 }
 
 export interface EntryData {
+    _id?: string
     [key: string]: any;
 }
 

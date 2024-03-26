@@ -21,6 +21,7 @@ export class SubscriptionManager {
                 skipNegotiation: true,
                 transport: signalR.HttpTransportType.WebSockets
             })
+            .withAutomaticReconnect([0, 2000, 10000, 30000, 60000])
             .configureLogging(signalR.LogLevel.None)
             .build();
         this._hubConnection.start()
